@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software de Costos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .button button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button button:hover {
+            background-color: #45a049;
+        }
+        .profit-input {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .profit-input input {
+            width: 50px;
+            padding: 6px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section-divider {
+            border-top: 2px solid #4CAF50;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Bienvenido al Software de Costos</h1>
+
+<table id="costTable">
+    <thead>
+        <tr>
+            <th>Nombre del Producto</th>
+            <th>Cantidad Adquirida</th>
+            <th>Precio del Producto</th>
+            <th>Cantidad Utilizada</th>
+            <th>Costo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="text" name="productName"></td>
+            <td><input type="number" name="productQuantity" oninput="calculateCost(this)"></td>
+            <td><input type="number" name="productPrice" oninput="calculateCost(this)"></td>
+            <td><input type="number" name="quantityUsed" oninput="calculateCost(this)"></td>
+            <td><input type="number" name="cost" readonly></td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="button">
+    <button onclick="addRow('costTable')">+</button>
+    <button onclick="removeRow('costTable')">-</button>
+</div>
+
+<div class="button">
+    <button onclick="calculateTotal()">Calcular</button>
+</div>
+
+<div class="button">
+    <p>Total de Costos: <span id="totalCost">0</span></p>
+</div>
+
+<table id="expensesTable">
+    <thead>
+        <tr>
+            <th>Otros Gastos</th>
+            <th>Gasto Mensual</th>
+            <th>Gasto Diario</th>
+            <th>Cantidad de Platos</th>
+            <th>Gasto Diario Dividido en Cantidad de Platos</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="text" name="expenseName"></td>
+            <td><input type="number" name="monthlyExpense" oninput="calculateExpense(this)"></td>
+            <td><input type="number" name="dailyExpense" readonly></td>
+            <td><input type="number" name="plates" oninput="calculateExpense(this)"></td>
+            <td><input type="number" name="dailyPerPlate" readonly></td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="button">
+    <button onclick="addRow('expensesTable')">+</button>
+    <button onclick="removeRow('expensesTable')">-</button>
+</div>
+
+<div class="button">
+    <button onclick="calculateTotal()">Calcular</button>
+</div>
+
+<div class="button">
+    <p>Total de Otros Gastos: <span id="totalOtherExpenses">0</span></p>
+</div>
+
+<div class="section-divider"></div>
+
+<div class="button">
+    <p>Total General: <span id="totalAllCosts">0</span></p>
+</div>
+
+<div class="profit-input">
+    <label for="profitPercentage">Porcentaje de Ganancia: </label>
+    <input type="number" id="profitPercentage" oninput="calculateProfit()">
+</div>
+
+<div class="button">
+    <p>Total con Ganancia: <span id="totalWithProfit">0</span></p>
+</div>
+
+<script>
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+        const cellsCount = table.rows[0].cells.length;
+        for (let i = 0; i < cellsCount; i++) {
+            const newCell = newRow.insertCell(i);
+            const input = document.createElement("input");
+            input.type = tableId === 'costTable' ? (i === 0 ? "text" : "number") : "text";
+            input.name = tableId === 'costTable' ? ["productName", "productQuantity", "productPrice", "quantityUsed", "cost"][i] : ["expenseName", "monthlyExpense", "dailyExpense", "plates", "dailyPerPlate"][i];
+            if (i === 4 || (tableId === 'expensesTable' && (i === 2 || i === 4))) input.readOnly = true;
+            else input.oninput = () => tableId === 'costTable' ? calculateCost(input) : calculateExpense(input);
+            newCell.appendChild(input);
+        }
+    }
+
+    function removeRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        if (table.rows.length > 1) {
+            table.deleteRow(-1);
+        }
+    }
+
+    function calculateCost(element) {
+        const row = element.parentElement.parentElement;
+        const quantityPurchased = parseFloat(row.cells[1].children[0].value) || 0;
+        const price = parseFloat(row.cells[2].children[0].value) || 0;
+        const quantityUsed = parseFloat(row.cells[3].children[0].value) || 0;
+        const cost = (quantityUsed * price / quantityPurchased).toFixed(2);
+        row.cells[4].children[0].value = isNaN(cost) ? 0 : cost;
+    }
+
+    function calculateExpense(element) {
+        const row = element.parentElement.parentElement;
+        const monthlyExpense = parseFloat(row.cells[1].children[0].value) || 0;
+        const dailyExpense = (monthlyExpense / 30).toFixed(2);
+        row.cells[2].children[0].value = isNaN(dailyExpense) ? 0 : dailyExpense;
+
+        const plates = parseFloat(row.cells[3].children[0].value) || 0;
+        const dailyPerPlate = (plates ? (dailyExpense / plates) : 0).toFixed(2);
+        row.cells[4].children[0].value = isNaN(dailyPerPlate) ? 0 : dailyPerPlate;
+    }
+
+    function calculateTotal() {
+        const costTableRows = document.getElementById("costTable").getElementsByTagName('tbody')[0].rows;
+        let totalCost = 0;
+        for (let i = 0; i < costTableRows.length; i++) {
+            totalCost += parseFloat(costTableRows[i].cells[4].children[0].value) || 0;
+        }
+        document.getElementById("totalCost").innerText = totalCost.toFixed(2);
+
+        const expensesTableRows = document.getElementById("expensesTable").getElementsByTagName('tbody')[0].rows;
+        let totalOtherExpenses = 0;
+        for (let i = 0; i < expensesTableRows.length; i++) {
+            totalOtherExpenses += parseFloat(expensesTableRows[i].cells[4].children[0].value) || 0;
+        }
+        document.getElementById("totalOtherExpenses").innerText = totalOtherExpenses.toFixed(2);
+
+        const totalAllCosts = (totalCost + totalOtherExpenses).toFixed(2);
+        document.getElementById("totalAllCosts").innerText = totalAllCosts;
+
+        calculateProfit();
+    }
+
+    function calculateProfit() {
+        const totalAllCosts = parseFloat(document.getElementById("totalAllCosts").innerText) || 0;
+        const profitPercentage = parseFloat(document.getElementById("profitPercentage").value) || 0;
+        const totalWithProfit = (totalAllCosts * (1 + profitPercentage / 100)).toFixed(2);
+        document.getElementById("totalWithProfit").innerText = totalWithProfit;
+    }
+</script>
+
+</body>
+</html>
