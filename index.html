@@ -4,26 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Software de Costos</title>
-    <!-- Fuente de Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             margin: 20px;
             background-color: #f9f9f9;
-            transition: background-color 0.3s ease;
         }
-        h1 {
+        .hidden { display: none; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        h1, h2 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         th, td {
             border: 1px solid #ddd;
@@ -33,244 +31,338 @@
         th {
             background-color: #4CAF50;
             color: white;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #e9f7e9;
-        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #e9f7e9; }
         input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 8px; margin: 5px 0;
+            box-sizing: border-box; border: 1px solid #ddd;
+            border-radius: 4px; font-size: 16px;
         }
-        input[type="number"]:focus, input[type="text"]:focus {
-            border-color: #4CAF50;
-        }
-        .button {
-            margin-top: 20px;
-            text-align: center;
+        input[readonly] { background-color: #eee; }
+        .button, .profit-input {
+            text-align: center; margin-top: 20px;
         }
         .button button {
-            padding: 12px 20px;
-            font-size: 16px;
-            margin: 0 5px;
+            padding: 10px 20px;
             background-color: transparent;
-            color: #4CAF50;
             border: 2px solid #4CAF50;
-            border-radius: 4px;
+            color: #4CAF50;
             cursor: pointer;
-            transition: all 0.3s;
+            margin: 5px;
         }
-        .button button:hover, .button button:active {
+        .button button:hover {
             background-color: #4CAF50;
             color: white;
-        }
-        .profit-input {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .profit-input input {
-            width: 60px;
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
         }
         .section-divider {
             border-top: 2px solid #4CAF50;
             margin: 30px 0;
         }
-        /* Efecto de transición suave al agregar filas */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
+        .recipe-list {
+            max-width: 600px;
+            margin: auto;
         }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
+        .recipe-item {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
+        .recipe-name-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+        }
+        .recipe-name-container label {
+            margin-right: 10px;
+            font-weight: 600;
+            width: 180px; /* Fija el tamaño de la etiqueta */
+        }
+        .input-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .input-container.centered {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .input-container.centered label {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        .input-container.centered input {
+            width: 80px; /* Ajuste al tamaño de un número de 4 dígitos */
+        }
     </style>
 </head>
 <body>
 
-<h1>Bienvenido al Software de Costos</h1>
+<div id="mainScreen" class="screen active">
+    <h1>Software de Costos</h1>
 
-<!-- Tabla de Costos -->
-<table id="costTable">
-    <thead>
-        <tr>
-            <th>Nombre del Producto</th>
-            <th>Cantidad Adquirida</th>
-            <th>Precio del Producto</th>
-            <th>Cantidad Utilizada</th>
-            <th>Costo</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><input type="text" name="productName" placeholder="ej. Harina"></td>
-            <td><input type="number" name="productQuantity" placeholder="Unidades ej. 20" oninput="calculateCost(this); calculateTotal();"></td>
-            <td><input type="number" name="productPrice" placeholder="ej. 200" oninput="calculateCost(this); calculateTotal();"></td>
-            <td><input type="number" name="quantityUsed" placeholder="Unidades ej. 20" oninput="calculateCost(this); calculateTotal();"></td>
-            <td><input type="number" name="cost" placeholder="Costo" readonly></td>
-        </tr>
-    </tbody>
-</table>
+    <!-- Contenedor para nombre de la receta alineado a la izquierda -->
+    <div class="input-container recipe-name-container">
+        <label for="recipeName">Nombre de la Receta: </label>
+        <input type="text" id="recipeName" placeholder="Ej: Medialunas">
+    </div>
 
-<div class="button">
-    <button onclick="addRow('costTable')">+</button>
-    <button onclick="removeRow('costTable')">-</button>
+    <!-- Tabla de Costos -->
+    <table id="costTable">
+        <thead>
+            <tr>
+                <th>Nombre del Producto</th>
+                <th>Cantidad Adquirida</th>
+                <th>Precio del Producto</th>
+                <th>Cantidad Utilizada</th>
+                <th>Costo</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="button">
+        <button onclick="addRow('costTable')">+</button>
+        <button onclick="removeRow('costTable')">-</button>
+    </div>
+    <div class="button">
+        <p>Total de Costos: <span id="totalCost">0</span></p>
+    </div>
+
+    <!-- Tabla de Otros gastos -->
+    <table id="expensesTable">
+        <thead>
+            <tr>
+                <th>Otros Gastos</th>
+                <th>Gasto Mensual</th>
+                <th>Gasto Diario</th>
+                <th>Cantidad de Platos</th>
+                <th>Gasto Diario por Plato</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="button">
+        <button onclick="addRow('expensesTable')">+</button>
+        <button onclick="removeRow('expensesTable')">-</button>
+    </div>
+    <div class="button">
+        <p>Total de Otros Gastos: <span id="totalOtherExpenses">0</span></p>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="button">
+        <p>Total General: <span id="totalAllCosts">0</span></p>
+    </div>
+
+    <!-- Contenedor para porcentaje de ganancia centrado -->
+    <div class="input-container centered">
+        <label for="profitPercentage">Porcentaje de Ganancia: </label>
+        <input type="number" id="profitPercentage" placeholder="%" oninput="calculateProfit()">
+    </div>
+    <div class="button">
+        <p>Total con Ganancia: <span id="totalWithProfit">0</span></p>
+    </div>
+
+    <div class="button">
+        <button onclick="saveRecipe()">Guardar Receta</button>
+        <button onclick="resetPage()">Borrar Todo</button>
+    </div>
+
+    <div class="button">
+        <button onclick="switchScreen('recipeListScreen')">Ver Recetas</button>
+    </div>
 </div>
 
-<div class="button">
-    <p>Total de Costos: <span id="totalCost">0</span></p>
-</div>
-
-<!-- Tabla de Otros gastos -->
-<table id="expensesTable">
-    <thead>
-        <tr>
-            <th>Otros Gastos</th>
-            <th>Gasto Mensual</th>
-            <th>Gasto Diario</th>
-            <th>Cantidad de Platos</th>
-            <th>Gasto Diario Dividido en Cantidad de Platos</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><input type="text" name="expenseName" placeholder="ej. Alquiler"></td>
-            <td><input type="number" name="monthlyExpense" placeholder="ej. 2000" oninput="calculateExpense(this); calculateTotal();"></td>
-            <td><input type="number" name="dailyExpense" placeholder="" readonly></td>
-            <td><input type="number" name="plates" placeholder="ej. 5" oninput="calculateExpense(this); calculateTotal();"></td>
-            <td><input type="number" name="dailyPerPlate" placeholder="Gasto Diario por Plato" readonly></td>
-        </tr>
-    </tbody>
-</table>
-
-<div class="button">
-    <button onclick="addRow('expensesTable')">+</button>
-    <button onclick="removeRow('expensesTable')">-</button>
-</div>
-
-<div class="button">
-    <p>Total de Otros Gastos: <span id="totalOtherExpenses">0</span></p>
-</div>
-
-<!-- Separador de Sección -->
-<div class="section-divider"></div>
-
-<!-- Total General -->
-<div class="button">
-    <p>Total General: <span id="totalAllCosts">0</span></p>
-</div>
-
-<!-- Entrada de Ganancia -->
-<div class="profit-input">
-    <label for="profitPercentage">Porcentaje de Ganancia: </label>
-    <input type="number" id="profitPercentage" placeholder="%" oninput="calculateProfit()">
-</div>
-
-<div class="button">
-    <p>Total con Ganancia: <span id="totalWithProfit">0</span></p>
-</div>
-
-<!-- Botón para borrar todo -->
-<div class="button">
-    <button onclick="resetPage()">Borrar Todo</button>
+<!-- Pantalla Recetas -->
+<div id="recipeListScreen" class="screen">
+    <h2>Recetas Guardadas</h2>
+    <div class="button">
+        <button onclick="switchScreen('mainScreen')">Volver</button>
+    </div>
+    <div class="recipe-list" id="recipeList"></div>
 </div>
 
 <script>
-    function addRow(tableId) {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const newRow = table.insertRow();
-        newRow.classList.add('fade-in'); // Añadir animación de aparición
+    document.addEventListener("DOMContentLoaded", () => {
+        addRow('costTable');
+        addRow('expensesTable');
+        loadRecipes();
+    });
 
-        const cellsCount = table.rows[0].cells.length;
-        for (let i = 0; i < cellsCount; i++) {
-            const newCell = newRow.insertCell(i);
-            const input = document.createElement("input");
-            input.type = tableId === 'costTable' ? (i === 0 ? "text" : "number") : "text";
-            input.name = tableId === 'costTable' ? ["productName", "productQuantity", "productPrice", "quantityUsed", "cost"][i] : ["expenseName", "monthlyExpense", "dailyExpense", "plates", "dailyPerPlate"][i];
-            if (i === 4 || (tableId === 'expensesTable' && (i === 2 || i === 4))) input.readOnly = true;
-            else input.oninput = () => {
-                tableId === 'costTable' ? calculateCost(input) : calculateExpense(input);
-                calculateTotal();
-            };
-            newCell.appendChild(input);
-        }
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if (screenId === 'recipeListScreen') loadRecipes();
+    }
+
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).querySelector('tbody');
+        const row = table.insertRow();
+        const columns = tableId === 'costTable'
+            ? ["text", "number", "number", "number", "number"]
+            : ["text", "number", "number", "number", "number"];
+        const names = tableId === 'costTable'
+            ? ["productName", "productQuantity", "productPrice", "quantityUsed", "cost"]
+            : ["expenseName", "monthlyExpense", "dailyExpense", "plates", "dailyPerPlate"];
+        columns.forEach((type, i) => {
+            const cell = row.insertCell();
+            const input = document.createElement('input');
+            input.type = type;
+            input.name = names[i];
+            if ((tableId === 'costTable' && i === 4) || (tableId === 'expensesTable' && (i === 2 || i === 4))) {
+                input.readOnly = true;
+            } else {
+                input.oninput = () => {
+                    tableId === 'costTable' ? calculateCost(input) : calculateExpense(input);
+                    calculateTotal();
+                };
+            }
+            cell.appendChild(input);
+        });
     }
 
     function removeRow(tableId) {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        if (table.rows.length > 1) {
-            table.deleteRow(-1);
-            calculateTotal();
-        }
+        const table = document.getElementById(tableId).querySelector('tbody');
+        if (table.rows.length > 1) table.deleteRow(-1);
+        calculateTotal();
     }
 
-    function calculateCost(element) {
-        const row = element.parentElement.parentElement;
-        const quantityPurchased = parseFloat(row.cells[1].children[0].value) || 0;
+    function calculateCost(input) {
+        const row = input.closest('tr');
+        const qAdq = parseFloat(row.cells[1].children[0].value) || 0;
         const price = parseFloat(row.cells[2].children[0].value) || 0;
-        const quantityUsed = parseFloat(row.cells[3].children[0].value) || 0;
-        const cost = (quantityUsed * price / quantityPurchased).toFixed(2);
-        row.cells[4].children[0].value = isNaN(cost) ? 0 : cost;
+        const qUsed = parseFloat(row.cells[3].children[0].value) || 0;
+        const cost = qAdq ? (qUsed * price / qAdq).toFixed(2) : 0;
+        row.cells[4].children[0].value = cost;
     }
 
-    function calculateExpense(element) {
-        const row = element.parentElement.parentElement;
-        const monthlyExpense = parseFloat(row.cells[1].children[0].value) || 0;
-        const dailyExpense = (monthlyExpense / 30).toFixed(2);
-        row.cells[2].children[0].value = isNaN(dailyExpense) ? 0 : dailyExpense;
-
+    function calculateExpense(input) {
+        const row = input.closest('tr');
+        const monthly = parseFloat(row.cells[1].children[0].value) || 0;
+        const daily = (monthly / 30).toFixed(2);
+        row.cells[2].children[0].value = daily;
         const plates = parseFloat(row.cells[3].children[0].value) || 0;
-        const dailyPerPlate = (plates ? (dailyExpense / plates) : 0).toFixed(2);
-        row.cells[4].children[0].value = isNaN(dailyPerPlate) ? 0 : dailyPerPlate;
+        row.cells[4].children[0].value = plates ? (daily / plates).toFixed(2) : 0;
     }
 
     function calculateTotal() {
-        const costTableRows = document.getElementById("costTable").getElementsByTagName('tbody')[0].rows;
         let totalCost = 0;
-        for (let i = 0; i < costTableRows.length; i++) {
-            totalCost += parseFloat(costTableRows[i].cells[4].children[0].value) || 0;
-        }
+        document.querySelectorAll('#costTable tbody tr').forEach(row => {
+            totalCost += parseFloat(row.cells[4].children[0].value) || 0;
+        });
         document.getElementById("totalCost").innerText = totalCost.toFixed(2);
 
-        const expensesTableRows = document.getElementById("expensesTable").getElementsByTagName('tbody')[0].rows;
         let totalOtherExpenses = 0;
-        for (let i = 0; i < expensesTableRows.length; i++) {
-            totalOtherExpenses += parseFloat(expensesTableRows[i].cells[4].children[0].value) || 0;
-        }
+        document.querySelectorAll('#expensesTable tbody tr').forEach(row => {
+            totalOtherExpenses += parseFloat(row.cells[4].children[0].value) || 0;
+        });
         document.getElementById("totalOtherExpenses").innerText = totalOtherExpenses.toFixed(2);
 
-        const totalAllCosts = (totalCost + totalOtherExpenses).toFixed(2);
-        document.getElementById("totalAllCosts").innerText = totalAllCosts;
-
+        const total = totalCost + totalOtherExpenses;
+        document.getElementById("totalAllCosts").innerText = total.toFixed(2);
         calculateProfit();
     }
 
     function calculateProfit() {
-        const totalAllCosts = parseFloat(document.getElementById("totalAllCosts").innerText) || 0;
-        const profitPercentage = parseFloat(document.getElementById("profitPercentage").value) || 0;
-        const totalWithProfit = (totalAllCosts * (1 + profitPercentage / 100)).toFixed(2);
-        document.getElementById("totalWithProfit").innerText = totalWithProfit;
+        const total = parseFloat(document.getElementById("totalAllCosts").innerText) || 0;
+        const pct = parseFloat(document.getElementById("profitPercentage").value) || 0;
+        const withProfit = total * (1 + pct / 100);
+        document.getElementById("totalWithProfit").innerText = withProfit.toFixed(2);
     }
 
     function resetPage() {
-        document.body.innerHTML = document.body.innerHTML;
-        window.location.reload();
+        location.reload();
+    }
+
+    function saveRecipe() {
+        const name = document.getElementById("recipeName").value.trim();
+        if (!name) return alert("Debe ingresar un nombre de receta");
+
+        const costData = Array.from(document.querySelectorAll('#costTable tbody tr')).map(row => {
+            return Array.from(row.cells).map(cell => cell.children[0].value);
+        });
+        const expenseData = Array.from(document.querySelectorAll('#expensesTable tbody tr')).map(row => {
+            return Array.from(row.cells).map(cell => cell.children[0].value);
+        });
+
+        const recipe = {
+            name,
+            costData,
+            expenseData,
+            profit: document.getElementById("profitPercentage").value
+        };
+
+        const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
+        recipes.push(recipe);
+        localStorage.setItem("recipes", JSON.stringify(recipes));
+        alert("Receta guardada exitosamente");
+    }
+
+    function loadRecipes() {
+        const container = document.getElementById("recipeList");
+        container.innerHTML = "";
+        const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
+        recipes.forEach((r, i) => {
+            const div = document.createElement("div");
+            div.className = "recipe-item";
+            div.innerHTML = `<strong>${r.name}</strong>
+                <span>
+                    <button onclick="loadRecipe(${i})">Ver</button>
+                    <button onclick="deleteRecipe(${i})">Eliminar</button>
+                </span>`;
+            container.appendChild(div);
+        });
+    }
+
+    function deleteRecipe(index) {
+        if (!confirm("¿Eliminar esta receta?")) return;
+        const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
+        recipes.splice(index, 1);
+        localStorage.setItem("recipes", JSON.stringify(recipes));
+        loadRecipes();
+    }
+
+    function loadRecipe(index) {
+        const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
+        const r = recipes[index];
+        document.getElementById("recipeName").value = r.name;
+        document.getElementById("profitPercentage").value = r.profit;
+
+        fillTable("costTable", r.costData);
+        fillTable("expensesTable", r.expenseData);
+
+        switchScreen("mainScreen");
+        calculateTotal();
+    }
+
+    function fillTable(tableId, data) {
+        const tbody = document.getElementById(tableId).querySelector("tbody");
+        tbody.innerHTML = "";
+        data.forEach(rowData => {
+            const row = tbody.insertRow();
+            rowData.forEach((val, i) => {
+                const cell = row.insertCell();
+                const input = document.createElement("input");
+                input.value = val;
+                input.type = (i === 0) ? "text" : "number";
+                if ((tableId === "costTable" && i === 4) || (tableId === "expensesTable" && (i === 2 || i === 4))) {
+                    input.readOnly = true;
+                } else {
+                    input.oninput = () => {
+                        tableId === "costTable" ? calculateCost(input) : calculateExpense(input);
+                        calculateTotal();
+                    };
+                }
+                cell.appendChild(input);
+            });
+        });
     }
 </script>
 
