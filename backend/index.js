@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 // Crear usuario (solo admin, para pruebas iniciales)
 app.post('/api/users', async (req, res) => {
-  const { username, password, role, autorizado } = req.body;
+  const { username, password, role, autorizado } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
   const hash = await bcrypt.hash(password, 10);
   db.run(
@@ -44,7 +44,8 @@ app.post('/api/users', async (req, res) => {
 
 // Login
 app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
   db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
     if (err || !user) return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     if (!user.autorizado) return res.status(403).json({ error: 'Usuario no autorizado' });
@@ -114,11 +115,11 @@ app.delete('/api/users/:id', auth, isAdmin, (req, res) => {
 
 // Endpoint temporal para crear el primer admin si no existe ningún usuario
 app.post('/api/first-admin', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
   db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
     if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
     if (row.count > 0) return res.status(400).json({ error: 'Ya existe al menos un usuario' });
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
     const hash = await bcrypt.hash(password, 10);
     db.run(
       'INSERT INTO users (username, password, role, autorizado) VALUES (?, ?, ?, ?)',
@@ -141,10 +142,10 @@ app.get('/api/users-exist', (req, res) => {
 
 // Registro solo si no hay usuarios
 app.post('/api/register', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
   db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
     if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
     const hash = await bcrypt.hash(password, 10);
     let role = 'user';
     let autorizado = 1;
