@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Login({ onLogin }) {
+function Login({ onLogin, onSwitchToRegister, showRegister }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,6 +33,11 @@ function Login({ onLogin }) {
         </div>
         <button type="submit">Ingresar</button>
       </form>
+      {showRegister && (
+        <div className="button">
+          <button onClick={onSwitchToRegister}>¿No tienes cuenta? Regístrate</button>
+        </div>
+      )}
     </div>
   );
 }

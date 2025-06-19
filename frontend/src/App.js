@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RecipeForm from './components/RecipeForm';
 import RecipeList from './components/RecipeList';
 import Login from './components/Login';
-// import Register from './components/Register';
+import Register from './components/Register';
 import UserManagement from './components/UserManagement';
 import './App.css';
 import API_BASE_URL from './utils/api';
@@ -21,6 +21,8 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState(false);
   const [adminEditData, setAdminEditData] = useState({ username: '', password: '', password2: '' });
+  const [showRegister, setShowRegister] = useState(false);
+  const [usersExist, setUsersExist] = useState(true);
 
   // Cargar recetas solo del usuario logueado
   useEffect(() => {
@@ -51,6 +53,14 @@ function App() {
     setUsers(usersList);
   }, []);
 
+  // Verificar si existen usuarios en el backend
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/users-exist`)
+      .then(res => res.json())
+      .then(data => setUsersExist(data.exist))
+      .catch(() => setUsersExist(true));
+  }, []);
+
   // Login simulado
   const handleLogin = ({ username, password }) => {
     const users = getUsers();
@@ -65,6 +75,21 @@ function App() {
     } else {
       alert('Usuario o contraseña incorrectos');
     }
+  };
+
+  const handleRegister = ({ username, password }) => {
+    fetch(`${API_BASE_URL}/api/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) return alert(data.error);
+        alert('Usuario registrado correctamente');
+        setShowRegister(false);
+        setUsersExist(true);
+      });
   };
 
   // Guardar receta asociada al usuario
@@ -183,8 +208,11 @@ function App() {
 
   return (
     <div className="App">
-      {!user && screen === 'login' && (
-        <Login onLogin={handleLogin} />
+      {!user && !usersExist && showRegister && (
+        <Register onRegister={handleRegister} onSwitchToLogin={() => setShowRegister(false)} />
+      )}
+      {!user && (usersExist || !showRegister) && (
+        <Login onLogin={handleLogin} onSwitchToRegister={() => setShowRegister(true)} showRegister={!usersExist} />
       )}
       {user && (
         <>

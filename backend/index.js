@@ -111,6 +111,54 @@ app.delete('/api/users/:id', auth, isAdmin, (req, res) => {
   });
 });
 
+// Endpoint temporal para crear el primer admin si no existe ningún usuario
+app.post('/api/first-admin', async (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
+    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
+    if (row.count > 0) return res.status(400).json({ error: 'Ya existe al menos un usuario' });
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
+    const hash = await bcrypt.hash(password, 10);
+    db.run(
+      'INSERT INTO users (username, password, role, autorizado) VALUES (?, ?, ?, ?)',
+      [username, hash, 'admin', 1],
+      function (err) {
+        if (err) return res.status(400).json({ error: 'No se pudo crear el admin' });
+        res.json({ id: this.lastID, username, role: 'admin', autorizado: true });
+      }
+    );
+  });
+});
+
+// Saber si existen usuarios
+app.get('/api/users-exist', (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
+    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
+    res.json({ exist: row.count > 0 });
+  });
+});
+
+// Registro solo si no hay usuarios
+app.post('/api/register', async (req, res) => {
+  db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
+    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
+    const hash = await bcrypt.hash(password, 10);
+    let role = 'user';
+    let autorizado = 1;
+    if (row.count === 0) role = 'admin';
+    db.run(
+      'INSERT INTO users (username, password, role, autorizado) VALUES (?, ?, ?, ?)',
+      [username, hash, role, autorizado],
+      function (err) {
+        if (err) return res.status(400).json({ error: 'Usuario ya existe' });
+        res.json({ id: this.lastID, username, role, autorizado: !!autorizado });
+      }
+    );
+  });
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor backend escuchando en http://localhost:${PORT}`);
