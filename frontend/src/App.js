@@ -63,18 +63,18 @@ function App() {
 
   // Login simulado
   const handleLogin = ({ username, password }) => {
-    const users = getUsers();
-    const found = users.find(u => u.username === username && u.password === password);
-    if (found) {
-      if (!found.autorizado) {
-        alert('El usuario no está autorizado para iniciar sesión');
-        return;
-      }
-      setUser(found);
-      setScreen('main');
-    } else {
-      alert('Usuario o contraseña incorrectos');
-    }
+    fetch(`${API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) return alert(data.error);
+        setUser(data.user);
+        setScreen('main');
+        // Puedes guardar el token si lo necesitas: localStorage.setItem('token', data.token)
+      });
   };
 
   const handleRegister = ({ username, password }) => {
