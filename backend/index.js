@@ -4,28 +4,12 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4000;
 
 // Middlewares
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://lauty39.github.io'
-];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 // Conexión a la base de datos SQLite
@@ -44,7 +28,7 @@ app.get('/', (req, res) => {
 
 // Crear usuario (solo admin, para pruebas iniciales)
 app.post('/api/users', async (req, res) => {
-  const { username, password, role, autorizado } = req.body || {};
+  const { username, password, role, autorizado } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
   const hash = await bcrypt.hash(password, 10);
   db.run(
@@ -59,8 +43,7 @@ app.post('/api/users', async (req, res) => {
 
 // Login
 app.post('/api/login', (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
+  const { username, password } = req.body;
   db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
     if (err || !user) return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     if (!user.autorizado) return res.status(403).json({ error: 'Usuario no autorizado' });
@@ -125,65 +108,6 @@ app.delete('/api/users/:id', auth, isAdmin, (req, res) => {
     if (err) return res.status(500).json({ error: 'Error al eliminar usuario' });
     if (this.changes === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json({ success: true });
-  });
-});
-
-// Endpoint temporal para crear el primer admin si no existe ningún usuario
-app.post('/api/first-admin', async (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
-  db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
-    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
-    if (row.count > 0) return res.status(400).json({ error: 'Ya existe al menos un usuario' });
-    const hash = await bcrypt.hash(password, 10);
-    db.run(
-      'INSERT INTO users (username, password, role, autorizado) VALUES (?, ?, ?, ?)',
-      [username, hash, 'admin', 1],
-      function (err) {
-        if (err) return res.status(400).json({ error: 'No se pudo crear el admin' });
-        res.json({ id: this.lastID, username, role: 'admin', autorizado: true });
-      }
-    );
-  });
-});
-
-// Saber si existen usuarios
-app.get('/api/users-exist', (req, res) => {
-  db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
-    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
-    res.json({ exist: row.count > 0 });
-  });
-});
-
-// Registro solo si no hay usuarios
-app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
-  db.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
-    if (err) return res.status(500).json({ error: 'Error al consultar usuarios' });
-    const hash = await bcrypt.hash(password, 10);
-    let role = 'user';
-    let autorizado = 1;
-    if (row.count === 0) role = 'admin';
-    db.run(
-      'INSERT INTO users (username, password, role, autorizado) VALUES (?, ?, ?, ?)',
-      [username, hash, role, autorizado],
-      function (err) {
-        if (err) return res.status(400).json({ error: 'Usuario ya existe' });
-        res.json({ id: this.lastID, username, role, autorizado: !!autorizado });
-      }
-    );
-  });
-});
-
-// Endpoint temporal para borrar todos los usuarios y recetas (solo para desarrollo)
-app.post('/api/reset-all', (req, res) => {
-  db.serialize(() => {
-    db.run('DELETE FROM recipes');
-    db.run('DELETE FROM users', function(err) {
-      if (err) return res.status(500).json({ error: 'Error al borrar usuarios' });
-      res.json({ success: true, message: 'Usuarios y recetas eliminados' });
-    });
   });
 });
 
