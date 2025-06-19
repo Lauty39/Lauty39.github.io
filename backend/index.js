@@ -159,6 +159,17 @@ app.post('/api/register', async (req, res) => {
   });
 });
 
+// Endpoint temporal para borrar todos los usuarios y recetas (solo para desarrollo)
+app.post('/api/reset-all', (req, res) => {
+  db.serialize(() => {
+    db.run('DELETE FROM recipes');
+    db.run('DELETE FROM users', function(err) {
+      if (err) return res.status(500).json({ error: 'Error al borrar usuarios' });
+      res.json({ success: true, message: 'Usuarios y recetas eliminados' });
+    });
+  });
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor backend escuchando en http://localhost:${PORT}`);
