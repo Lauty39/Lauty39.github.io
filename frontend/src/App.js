@@ -5,11 +5,20 @@ import Login from './components/Login';
 // import Register from './components/Register';
 import UserManagement from './components/UserManagement';
 import './App.css';
-import API_BASE_URL from './utils/api';
 
-// Simulación de usuarios en localStorage (hasta tener backend)
-const getUsers = () => JSON.parse(localStorage.getItem('users') || '[]');
-const saveUsers = (users) => localStorage.setItem('users', JSON.stringify(users));
+const API_URL = "https://lauty39-github-io.onrender.com";
+
+const apiFetch = (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return fetch(`${API_URL}${url}`, { ...options, headers });
+};
 
 function App() {
   const [screen, setScreen] = useState('login');
@@ -22,74 +31,102 @@ function App() {
   const [editingAdmin, setEditingAdmin] = useState(false);
   const [adminEditData, setAdminEditData] = useState({ username: '', password: '', password2: '' });
 
-  // Cargar recetas solo del usuario logueado
   useEffect(() => {
-    if (user) {
-      const allRecipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-      setRecipes(allRecipes.filter(r => r.user === user.username));
+    const checkUser = () => {
+        const storedUser = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        if(storedUser && token){
+            setUser(JSON.parse(storedUser));
+            setScreen('main');
+        }
     }
-  }, [user]);
+    checkUser();
+  }, [])
 
   useEffect(() => {
-    setUsers(getUsers());
-  }, [screen]);
-
-  useEffect(() => {
-    // Migración automática: asegurar que todos los admin tengan autorizado=true
-    let usersList = getUsers();
-    let changed = false;
-    usersList = usersList.map(u => {
-      if (u.role === 'admin' && !u.autorizado) {
-        changed = true;
-        return { ...u, autorizado: true };
-      }
-      return u;
-    });
-    if (changed) {
-      saveUsers(usersList);
+    if (user && user.role === 'admin' && screen === 'users') {
+      loadUsers();
     }
-    setUsers(usersList);
-  }, []);
+    if (user && (screen === 'list' || screen === 'main')) {
+      loadRecipes();
+    }
+  }, [user, screen]);
 
-  // Login simulado
-  const handleLogin = ({ username, password }) => {
-    const users = getUsers();
-    const found = users.find(u => u.username === username && u.password === password);
-    if (found) {
-      if (!found.autorizado) {
-        alert('El usuario no está autorizado para iniciar sesión');
-        return;
-      }
-      setUser(found);
+  const loadUsers = async () => {
+    try {
+      const res = await apiFetch('/api/users');
+      if (!res.ok) throw new Error('Error al cargar usuarios');
+      const data = await res.json();
+      setUsers(data);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  };
+
+  const loadRecipes = async () => {
+    try {
+        const res = await apiFetch('/api/recipes');
+        if(!res.ok) throw new Error('Error al cargar recetas');
+        const data = await res.json();
+        setRecipes(data);
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    }
+  }
+
+  const handleLogin = async ({ username, password }) => {
+    try {
+      const res = await apiFetch('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error de login');
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
       setScreen('main');
-    } else {
-      alert('Usuario o contraseña incorrectos');
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
     }
   };
 
-  // Guardar receta asociada al usuario
-  const saveRecipe = (recipe) => {
-    let allRecipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-    if (recipe.index !== undefined && recipe.index !== null) {
-      // Solo puede editar sus propias recetas
-      const idx = allRecipes.findIndex((r, i) => r.user === user.username && i === recipe.index);
-      if (idx !== -1) allRecipes[idx] = { ...recipe, user: user.username };
-    } else {
-      allRecipes.push({ ...recipe, user: user.username });
+  const saveRecipe = async (recipe) => {
+    try {
+        const url = recipe.id ? `/api/recipes/${recipe.id}` : '/api/recipes';
+        const method = recipe.id ? 'PUT' : 'POST';
+
+        const res = await apiFetch(url, {
+            method,
+            body: JSON.stringify(recipe)
+        });
+
+        if(!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Error al guardar receta');
+        }
+        
+        await loadRecipes();
+        setScreen('list');
+        setRecipeToEdit(null);
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
     }
-    localStorage.setItem('recipes', JSON.stringify(allRecipes));
-    setRecipes(allRecipes.filter(r => r.user === user.username));
-    setScreen('list');
-    setRecipeToEdit(null);
   };
 
-  const handleView = (i) => {
-    setRecipeToEdit({ ...recipes[i], index: i });
-    setViewingRecipe(i);
+  const handleView = (recipe) => {
+    setRecipeToEdit(recipe);
+    setViewingRecipe(recipe);
     setScreen('view');
     setIsEditing(false);
   };
-
+  
   const handleEditRecipe = () => {
     setIsEditing(true);
     setScreen('main');
@@ -102,56 +139,72 @@ function App() {
     setIsEditing(false);
   };
 
-  const handleDeleteRecipe = (i) => {
+  const handleDeleteRecipe = async (id) => {
     if (!window.confirm('¿Eliminar esta receta?')) return;
-    let allRecipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-    const filtered = allRecipes.filter((r, idx) => !(r.user === user.username && idx === i));
-    localStorage.setItem('recipes', JSON.stringify(filtered));
-    setRecipes(filtered.filter(r => r.user === user.username));
-    handleBackToList();
+    try {
+        const res = await apiFetch(`/api/recipes/${id}`, { method: 'DELETE' });
+        if(!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Error al eliminar receta');
+        }
+        await loadRecipes();
+        handleBackToList();
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setScreen('login');
     setRecipeToEdit(null);
   };
 
-  // Gestión de usuarios (solo admin)
-  const handleCreateUser = ({ username, password, role, autorizado }) => {
-    let usersList = getUsers();
-    // Si es el primer usuario (admin), autorizado siempre true
-    const isFirstUser = usersList.length === 0 && role === 'admin';
-    if (usersList.find(u => u.username === username)) {
-      alert('El usuario ya existe');
-      return;
+  const handleCreateUser = async ({ username, password, role }) => {
+    try {
+        const res = await apiFetch('/api/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, role, autorizado: true })
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Error al crear usuario');
+        await loadUsers();
+        alert('Usuario creado correctamente');
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
     }
-    usersList.push({ username, password, role, autorizado: autorizado !== undefined ? autorizado : isFirstUser ? true : false });
-    saveUsers(usersList);
-    setUsers(usersList);
-    alert('Usuario creado correctamente');
   };
 
-  const handleDeleteUser = (i) => {
-    let usersList = getUsers();
-    const userToDelete = usersList[i];
-    if (userToDelete.username === user.username) {
-      alert('No puedes eliminar tu propio usuario mientras estás logueado.');
-      return;
-    }
+  const handleDeleteUser = async (id) => {
     if (!window.confirm('¿Eliminar este usuario?')) return;
-    usersList.splice(i, 1);
-    saveUsers(usersList);
-    setUsers(usersList);
+    try {
+        const res = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+        if(!res.ok) throw new Error((await res.json()).error);
+        await loadUsers();
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    }
   };
 
-  // Modificar usuario (solo admin)
-  const handleEditUser = (i, newData) => {
-    let usersList = getUsers();
-    usersList[i] = { ...usersList[i], ...newData };
-    saveUsers(usersList);
-    setUsers(usersList);
-    alert('Usuario modificado correctamente');
+  const handleEditUser = async (userToEdit) => {
+    try {
+        const { id, ...userData } = userToEdit;
+        const res = await apiFetch(`/api/users/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(userData)
+        });
+        if(!res.ok) throw new Error((await res.json()).error);
+        await loadUsers();
+        alert('Usuario modificado correctamente');
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    }
   };
 
   const handleEditAdmin = () => {
@@ -163,18 +216,35 @@ function App() {
     setAdminEditData({ ...adminEditData, [field]: value });
   };
 
-  const handleSaveAdminEdit = () => {
+  const handleSaveAdminEdit = async () => {
     if (!adminEditData.username) return alert('El usuario no puede estar vacío');
     if (adminEditData.password && adminEditData.password !== adminEditData.password2) return alert('Las contraseñas no coinciden');
-    let usersList = JSON.parse(localStorage.getItem('users') || '[]');
-    const idx = usersList.findIndex(u => u.username === user.username);
-    if (idx === -1) return alert('Error interno');
-    usersList[idx].username = adminEditData.username;
-    if (adminEditData.password) usersList[idx].password = adminEditData.password;
-    localStorage.setItem('users', JSON.stringify(usersList));
-    setUser({ ...user, username: adminEditData.username });
-    setEditingAdmin(false);
-    alert('Datos actualizados');
+    
+    try {
+        const payload = {
+            username: adminEditData.username,
+            role: user.role,
+            autorizado: user.autorizado
+        };
+        if(adminEditData.password) payload.password = adminEditData.password;
+
+        const res = await apiFetch(`/api/users/${user.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+
+        if(!res.ok) throw new Error((await res.json()).error);
+
+        const updatedUser = { ...user, username: adminEditData.username };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setEditingAdmin(false);
+        alert('Datos actualizados');
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    }
   };
 
   const handleCancelAdminEdit = () => {
@@ -183,10 +253,9 @@ function App() {
 
   return (
     <div className="App">
-      {!user && screen === 'login' && (
+      {!user ? (
         <Login onLogin={handleLogin} />
-      )}
-      {user && (
+      ) : (
         <>
           <div className="button" style={{ textAlign: 'right' }}>
             <span>Usuario: <b>{user.username}</b></span>
@@ -198,60 +267,55 @@ function App() {
               </>
             )}
           </div>
+
           {editingAdmin && (
             <div className="user-management-container" style={{ maxWidth: 400, margin: '40px auto' }}>
               <h2>Modificar mis datos</h2>
-              <div>
-                <label>Usuario:</label>
-                <input type="text" value={adminEditData.username} onChange={e => handleAdminEditChange('username', e.target.value)} />
-              </div>
-              <div>
-                <label>Nueva contraseña:</label>
-                <input type="password" value={adminEditData.password} onChange={e => handleAdminEditChange('password', e.target.value)} />
-              </div>
-              <div>
-                <label>Repetir contraseña:</label>
-                <input type="password" value={adminEditData.password2} onChange={e => handleAdminEditChange('password2', e.target.value)} />
-              </div>
-              <div className="button">
-                <button onClick={handleSaveAdminEdit}>Guardar</button>
-                <button onClick={handleCancelAdminEdit}>Cancelar</button>
-              </div>
+              <div><label>Usuario:</label><input type="text" value={adminEditData.username} onChange={e => handleAdminEditChange('username', e.target.value)} /></div>
+              <div><label>Nueva contraseña:</label><input type="password" value={adminEditData.password} onChange={e => handleAdminEditChange('password', e.target.value)} /></div>
+              <div><label>Repetir contraseña:</label><input type="password" value={adminEditData.password2} onChange={e => handleAdminEditChange('password2', e.target.value)} /></div>
+              <div className="button"><button onClick={handleSaveAdminEdit}>Guardar</button><button onClick={handleCancelAdminEdit}>Cancelar</button></div>
             </div>
           )}
-          {screen === 'main' && (
+
+          {!editingAdmin && screen === 'main' && (
             <>
-              <RecipeForm onSave={saveRecipe} recipeToEdit={recipeToEdit} />
-              <div className="button">
-                <button onClick={() => setScreen('list')}>Ver Recetas</button>
+              <RecipeForm onSave={saveRecipe} recipeToEdit={recipeToEdit} readOnly={isEditing ? false : recipeToEdit !== null} />
+               <div className="button">
+                <button onClick={() => { setRecipeToEdit(null); setScreen('list')}}>Ver Recetas</button>
               </div>
             </>
           )}
-          {screen === 'list' && (
+
+          {!editingAdmin && screen === 'list' && (
             <>
-              <RecipeList recipes={recipes} onView={handleView} onDelete={handleDeleteRecipe} />
+              <RecipeList recipes={recipes} onView={handleView} onDelete={(id) => handleDeleteRecipe(id)} />
               <div className="button">
-                <button onClick={() => setScreen('main')}>Volver</button>
+                <button onClick={() => { setRecipeToEdit(null); setIsEditing(false); setScreen('main'); }}>Crear Nueva Receta</button>
               </div>
             </>
           )}
-          {screen === 'view' && viewingRecipe !== null && (
+
+          {!editingAdmin && screen === 'view' && viewingRecipe && (
             <>
               <RecipeForm
                 onSave={saveRecipe}
-                recipeToEdit={{ ...recipes[viewingRecipe], index: viewingRecipe }}
+                recipeToEdit={recipeToEdit}
                 readOnly={!isEditing}
               />
               <div className="button">
-                {!isEditing && <>
-                  <button onClick={handleEditRecipe}>Editar</button>
-                  <button onClick={() => handleDeleteRecipe(viewingRecipe)}>Eliminar</button>
-                </>}
+                {isEditing ? (
+                     <button onClick={() => saveRecipe(recipeToEdit)}>Guardar Cambios</button>
+                ) : (
+                    <button onClick={() => setIsEditing(true)}>Editar</button>
+                )}
+                <button onClick={() => handleDeleteRecipe(viewingRecipe.id)}>Eliminar</button>
                 <button onClick={handleBackToList}>Volver a la lista</button>
               </div>
             </>
           )}
-          {user.role === 'admin' && screen === 'users' && (
+
+          {!editingAdmin && user.role === 'admin' && screen === 'users' && (
             <>
               <UserManagement
                 users={users}
