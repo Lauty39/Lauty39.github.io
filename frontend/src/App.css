@@ -1,0 +1,233 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+.screen { display: none; }
+.screen.active { display: block; }
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+tr:nth-child(even) { background-color: #f2f2f2; }
+tr:hover { background-color: #e9f7e9; }
+input[type="number"], input[type="text"] {
+    padding: 8px; margin: 5px 0;
+    box-sizing: border-box; border: 1px solid #ddd;
+    border-radius: 4px; font-size: 16px;
+}
+input[readonly] { background-color: #eee; }
+.button, .profit-input {
+    text-align: center; margin-top: 20px;
+}
+.button button {
+    padding: 10px 20px;
+    background-color: transparent;
+    border: 2px solid #4CAF50;
+    color: #4CAF50;
+    cursor: pointer;
+    margin: 5px;
+}
+.button button:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+.section-divider {
+    border-top: 2px solid #4CAF50;
+    margin: 30px 0;
+}
+.recipe-list {
+    max-width: 600px;
+    margin: auto;
+}
+.recipe-item {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.recipe-name-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+.recipe-name-container label {
+    margin-right: 10px;
+    font-weight: 600;
+    width: 180px;
+}
+.input-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.input-container.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.input-container.centered label {
+    margin-right: 10px;
+    font-weight: 600;
+}
+.input-container.centered input {
+    width: 80px;
+}
+.login-container, .register-container {
+    max-width: 400px;
+    margin: 40px auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 30px 30px 20px 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.login-container h2, .register-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.login-container form div, .register-container form div {
+    margin-bottom: 15px;
+}
+.login-container label, .register-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+.login-container input, .register-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.login-container button[type="submit"], .register-container button[type="submit"] {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.login-container button[type="submit"]:hover, .register-container button[type="submit"]:hover {
+    background-color: #388e3c;
+}
+.user-management-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 30px 30px 20px 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.user-management-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.user-management-container form div {
+    margin-bottom: 15px;
+}
+.user-management-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+.user-management-container input, .user-management-container select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.user-management-container button[type="submit"] {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.user-management-container button[type="submit"]:hover {
+    background-color: #388e3c;
+}
+.user-management-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.user-management-container th, .user-management-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+.user-management-container th {
+    background-color: #4CAF50;
+    color: white;
+}
+.user-management-container tr:nth-child(even) { background-color: #f2f2f2; }
+.user-management-container tr:hover { background-color: #e9f7e9; }
