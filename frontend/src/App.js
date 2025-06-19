@@ -5,6 +5,7 @@ import Login from './components/Login';
 // import Register from './components/Register';
 import UserManagement from './components/UserManagement';
 import './App.css';
+import API_BASE_URL from './utils/api';
 
 // Simulación de usuarios en localStorage (hasta tener backend)
 const getUsers = () => JSON.parse(localStorage.getItem('users') || '[]');
