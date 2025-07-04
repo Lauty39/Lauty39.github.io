@@ -170,9 +170,9 @@
         <p>Total con Ganancia: <span id="totalWithProfit">0</span></p>
     </div>
 
-    <div class="button">
-        <button onclick="saveRecipe()">Guardar Receta</button>
-        <button onclick="resetPage()">Borrar Todo</button>
+    <div id="actionButtons" class="button">
+        <button id="saveRecipeBtn" onclick="saveRecipe()">Guardar Receta</button>
+        <button id="resetBtn" onclick="resetPage()">Borrar Todo</button>
     </div>
 
     <div class="button">
@@ -185,17 +185,20 @@
     <h2>Recetas Guardadas</h2>
     <div class="button">
         <button onclick="switchScreen('mainScreen')">Volver</button>
+        <button onclick="startNewRecipe()">Nueva Receta</button>
     </div>
     <div class="recipe-list" id="recipeList"></div>
 </div>
 
 <script>
     let currentEditingIndex = null;
+    let editingMode = false;
 
     document.addEventListener("DOMContentLoaded", () => {
         addRow('costTable');
         addRow('expensesTable');
         loadRecipes();
+        updateActionButtons();
     });
 
     function switchScreen(screenId) {
@@ -280,38 +283,37 @@
     }
 
     function resetPage() {
+        currentEditingIndex = null;
+        updateActionButtons();
         location.reload();
     }
 
     function saveRecipe() {
         const name = document.getElementById("recipeName").value.trim();
         if (!name) return alert("Debe ingresar un nombre de receta");
-
         const costData = Array.from(document.querySelectorAll('#costTable tbody tr')).map(row => {
             return Array.from(row.cells).map(cell => cell.children[0].value);
         });
         const expenseData = Array.from(document.querySelectorAll('#expensesTable tbody tr')).map(row => {
             return Array.from(row.cells).map(cell => cell.children[0].value);
         });
-
         const recipe = {
             name,
             costData,
             expenseData,
             profit: document.getElementById("profitPercentage").value
         };
-
         const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
-
         if (currentEditingIndex !== null) {
             recipes[currentEditingIndex] = recipe; // Update the existing recipe
-            currentEditingIndex = null; // Clear the editing index
+            alert("Receta actualizada exitosamente");
         } else {
             recipes.push(recipe); // Create new recipe
+            alert("Receta guardada exitosamente");
         }
-
         localStorage.setItem("recipes", JSON.stringify(recipes));
-        alert("Receta guardada exitosamente");
+        currentEditingIndex = null;
+        updateActionButtons();
         switchScreen("recipeListScreen");
     }
 
@@ -345,12 +347,11 @@
         const r = recipes[index];
         document.getElementById("recipeName").value = r.name;
         document.getElementById("profitPercentage").value = r.profit;
-
         fillTable("costTable", r.costData);
         fillTable("expensesTable", r.expenseData);
-
         switchScreen("mainScreen");
         calculateTotal();
+        updateActionButtons();
     }
 
     function fillTable(tableId, data) {
@@ -374,6 +375,39 @@
                 cell.appendChild(input);
             });
         });
+    }
+
+    function updateActionButtons() {
+        const saveBtn = document.getElementById('saveRecipeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        if (currentEditingIndex !== null) {
+            saveBtn.textContent = 'Guardar cambios';
+            resetBtn.style.display = 'none';
+            if (!document.getElementById('backToListBtn')) {
+                const backBtn = document.createElement('button');
+                backBtn.id = 'backToListBtn';
+                backBtn.textContent = 'Volver a la lista de recetas';
+                backBtn.onclick = () => switchScreen('recipeListScreen');
+                document.getElementById('actionButtons').appendChild(backBtn);
+            }
+        } else {
+            saveBtn.textContent = 'Guardar Receta';
+            resetBtn.style.display = '';
+            const backBtn = document.getElementById('backToListBtn');
+            if (backBtn) backBtn.remove();
+        }
+    }
+
+    function startNewRecipe() {
+        currentEditingIndex = null;
+        document.getElementById("recipeName").value = "";
+        document.getElementById("profitPercentage").value = "";
+        // Limpiar tablas
+        fillTable("costTable", [["", "", "", "", ""]]);
+        fillTable("expensesTable", [["", "", "", "", ""]]);
+        calculateTotal();
+        updateActionButtons();
+        switchScreen('mainScreen');
     }
 </script>
 
