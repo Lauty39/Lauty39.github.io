@@ -190,8 +190,6 @@
 </div>
 
 <script>
-    let currentEditingIndex = null;
-
     document.addEventListener("DOMContentLoaded", () => {
         addRow('costTable');
         addRow('expensesTable');
@@ -302,17 +300,9 @@
         };
 
         const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
-
-        if (currentEditingIndex !== null) {
-            recipes[currentEditingIndex] = recipe; // Update the existing recipe
-            currentEditingIndex = null; // Clear the editing index
-        } else {
-            recipes.push(recipe); // Create new recipe
-        }
-
+        recipes.push(recipe);
         localStorage.setItem("recipes", JSON.stringify(recipes));
         alert("Receta guardada exitosamente");
-        switchScreen("recipeListScreen");
     }
 
     function loadRecipes() {
@@ -340,7 +330,6 @@
     }
 
     function loadRecipe(index) {
-        currentEditingIndex = index; // Store the index of the recipe being edited
         const recipes = JSON.parse(localStorage.getItem("recipes") || "[]");
         const r = recipes[index];
         document.getElementById("recipeName").value = r.name;
