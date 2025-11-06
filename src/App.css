@@ -1,0 +1,744 @@
+/* Variables de colores modernos */
+:root {
+  --primary-color: #6366F1;
+  --primary-dark: #4F46E5;
+  --primary-light: #818CF8;
+  --accent-color: #10B981;
+  --accent-dark: #059669;
+  --danger-color: #EF4444;
+  --danger-dark: #DC2626;
+  --dark: #1F2937;
+  --dark-light: #374151;
+  --gray: #6B7280;
+  --gray-light: #E5E7EB;
+  --gray-lighter: #F3F4F6;
+  --background: #F9FAFB;
+  --white: #FFFFFF;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.app-container {
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 60px;
+}
+
+.hidden {
+  display: none;
+}
+
+.screen {
+  display: none;
+  flex: 1;
+}
+
+.screen.active {
+  display: block;
+  min-height: calc(100vh - 140px);
+}
+
+.screen.active .screen-container {
+  padding: 2rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Espaciado adicional para secciones en crear receta */
+.screen.active .screen-container .input-container,
+.screen.active .screen-container .table-wrapper,
+.screen.active .screen-container .button,
+.screen.active .screen-container .section-divider {
+  margin-bottom: 1.5rem;
+}
+
+.screen.active .screen-container .section-divider {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h1, h2, h3 {
+  color: var(--dark);
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Tablas modernas */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+  background-color: var(--white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+th {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:nth-child(even) {
+  background-color: var(--gray-lighter);
+}
+
+tr:hover {
+  background-color: #EEF2FF;
+  transition: background-color 0.2s ease;
+}
+
+/* Inputs modernos */
+input[type="number"], 
+input[type="text"],
+select {
+  padding: 10px 14px;
+  margin: 5px 0;
+  box-sizing: border-box;
+  border: 2px solid var(--gray-light);
+  border-radius: 6px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background-color: var(--white);
+}
+
+input[type="number"]:focus, 
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+input[readonly] {
+  background-color: var(--gray-lighter);
+  cursor: not-allowed;
+}
+
+/* Botones modernos */
+.button {
+  text-align: center;
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button,
+.btn-primary,
+.btn-danger,
+.btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+}
+
+.btn-primary,
+.button button {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+}
+
+.btn-primary:hover,
+.button button:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger-color) 100%);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--gray);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  background: var(--dark-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-divider {
+  border-top: 2px solid var(--gray-light);
+  margin: 30px 0;
+}
+
+/* Lista de recetas mejorada */
+.recipe-list {
+  max-width: 900px;
+  margin: auto;
+}
+
+.recipe-item {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.recipe-item:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.recipe-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.recipe-name {
+  font-size: 1.25rem;
+  color: var(--dark);
+  margin: 0;
+}
+
+.recipe-total {
+  font-size: 1rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.recipe-actions button {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
+.recipe-name-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.recipe-name-container label {
+  margin-right: 10px;
+  font-weight: 600;
+  width: 180px;
+  color: var(--dark);
+}
+
+.input-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.input-container.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-container.centered label {
+  margin-right: 10px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.input-container.centered input {
+  width: 120px;
+}
+
+/* Footer discreto */
+.app-footer {
+  text-align: center;
+  padding: 15px 20px;
+  margin-top: 40px;
+  font-size: 0.75rem;
+  color: var(--gray);
+  position: relative;
+  width: 100%;
+}
+
+.app-footer p {
+  margin: 0;
+  color: var(--gray);
+  opacity: 0.7;
+}
+
+/* Notificaciones */
+.notifications-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification {
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 300px;
+  animation: slideIn 0.3s ease;
+}
+
+.notification-success {
+  background: var(--accent-color);
+  color: white;
+}
+
+.notification-error {
+  background: var(--danger-color);
+  color: white;
+}
+
+.notification-info {
+  background: var(--primary-color);
+  color: white;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Modo oscuro */
+[data-theme="dark"] {
+  --background: #1F2937;
+  --white: #374151;
+  --gray-lighter: #4B5563;
+  --gray-light: #6B7280;
+  --gray: #9CA3AF;
+  --dark: #F9FAFB;
+  --dark-light: #E5E7EB;
+}
+
+[data-theme="dark"] .app-container {
+  background-color: var(--background);
+  color: var(--dark);
+}
+
+[data-theme="dark"] table {
+  background-color: var(--white);
+  color: var(--dark);
+}
+
+[data-theme="dark"] .recipe-item {
+  background: var(--white);
+  border-color: var(--gray-light);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+  background-color: var(--white);
+  color: var(--dark);
+  border-color: var(--gray-light);
+}
+
+/* Accesibilidad - Navegación por teclado */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Skip to main content para accesibilidad */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-color);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Mejoras adicionales */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid var(--gray-light);
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Responsive - Mobile First */
+@media (max-width: 1024px) {
+  .input-container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Tablas responsivas */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+
+  th {
+    font-size: 0.75rem;
+  }
+
+  /* Recipe items */
+  .recipe-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    margin: 10px 0;
+  }
+
+  .recipe-info {
+    width: 100%;
+  }
+
+  .recipe-name {
+    font-size: 1.1rem;
+  }
+
+  .recipe-total {
+    font-size: 0.9rem;
+  }
+
+  .recipe-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .recipe-actions button {
+    flex: 1;
+    padding: 10px 12px;
+  }
+
+  /* Inputs */
+  .recipe-name-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .recipe-name-container label {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .input-container.centered {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-container.centered label {
+    margin-right: 0;
+  }
+
+  .input-container.centered input {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  /* Botones */
+  .button {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .button button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  /* Screen padding */
+  .screen.active {
+    padding: 0;
+  }
+
+  .screen.active .screen-container {
+    padding: 1.25rem 1.25rem 2rem;
+    max-width: 100%;
+  }
+
+  /* Search inputs */
+  .search-input {
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+
+  /* Contenedor de búsqueda */
+  .search-container {
+    flex-direction: column;
+  }
+
+  .search-container > div {
+    width: 100%;
+  }
+
+  .search-container button {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Footer */
+  .app-footer {
+    padding: 15px 1rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Tablas más pequeñas */
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 6px 8px;
+    min-width: 80px;
+  }
+
+  th {
+    font-size: 0.7rem;
+  }
+
+  /* Recipe items */
+  .recipe-item {
+    padding: 12px;
+  }
+
+  .recipe-name {
+    font-size: 1rem;
+  }
+
+  .recipe-total {
+    font-size: 0.85rem;
+  }
+
+  /* Botones más pequeños */
+  button,
+  .btn-primary,
+  .btn-danger,
+  .btn-secondary {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+
+  /* Inputs */
+  input[type="number"], 
+  input[type="text"],
+  select {
+    padding: 8px 12px;
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+
+  /* Section divider */
+  .section-divider {
+    margin: 20px 0;
+  }
+
+  /* Formularios responsivos */
+  .form-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+}
+
+/* Clases para formularios responsivos */
+.form-grid-responsive {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-grid-responsive {
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .screen.active .screen-container {
+    padding: 1.25rem 1.25rem 2rem;
+  }
+
+  /* Ajustes específicos para formularios en móvil */
+  .form-grid-responsive > div {
+    width: 100%;
+  }
+
+  .form-grid-responsive button {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Tablas con scroll horizontal en móvil */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    width: calc(100% + 2rem);
+  }
+
+  .table-wrapper table {
+    margin: 0;
+    min-width: 600px;
+  }
+
+  /* Ajustes para inputs en tablas móviles */
+  table input,
+  table select {
+    min-width: 80px;
+    font-size: 14px;
+  }
+
+  /* Ajustes para selectores en móvil */
+  table select {
+    padding: 8px 6px;
+  }
+
+  /* Mejoras para la tabla de gastos en crear receta */
+  .expenses-table-wrapper {
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Tablas más compactas en móviles pequeños */
+  table input,
+  table select {
+    min-width: 60px;
+    font-size: 12px;
+    padding: 6px 4px;
+  }
+
+  /* Botones en tablas más pequeños */
+  table button {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
